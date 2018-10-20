@@ -1,0 +1,11 @@
+.history {
+  width: 50%;
+  margin: 0 10px;
+  font-family: Calibri;
+  
+}
+
+.history__field {
+  border: 1px solid black;
+  height: 300px;
+}

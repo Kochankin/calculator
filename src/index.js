@@ -1,96 +1,173 @@
 import React from 'react'; 
 import ReactDOM from 'react-dom'; 
 import './index.css'; 
+import CalculatorApp from './CalculatorApp/calculatorApp';
 
-import { createStore, bindActionCreators } from "redux"; // импортировать createStore 
-import { Provider, connect } from "react-redux"; // импортировать Provider 
+import { createStore, bindActionCreators } from "redux"; 
+import { Provider, connect } from "react-redux"; 
 
-const initialState = { count: 0 }; // задать изначальное значение 
+// INITIAL STATE
+const initialState = { 
+  curentNumber: 0,
+  currentResult: 0,
+  output: 0,
+  previousWasNumber: true,
+  operator: '+',
+  history: [[]]
+}; 
 
-// задать редьюсер = обработчик экшнов на основании переданных аргументов 
+// REDUCER 
 function reducer(state = initialState, action) { 
   switch (action.type){ 
-    case 'INCREMENT': return {count: state.count + action.amount }; 
-    case 'DECREMENT': return {count: state.count - action.amount }; 
-    case 'RESET': return {count: 0 }; 
+    case 'INCREMENT': return { 
+      ...state, 
+      currentResult: state.currentResult + state.curentNumber, 
+      previousWasNumber: false , 
+      operator: action.operator
+    }; 
+    case 'DECREMENT': return { 
+      ...state, 
+      currentResult: state.currentResult -  state.curentNumber, 
+      previousWasNumber: false, 
+      operator: action.operator 
+    }; 
+    case 'MULTIPLY': return { 
+      ...state, 
+      currentResult: state.currentResult *  state.curentNumber, 
+      previousWasNumber: false, 
+      operator: action.operator 
+    }; 
+    case 'DIVIDE': return { 
+      ...state,
+      currentResult: state.currentResult /  state.curentNumber, 
+      previousWasNumber: false, 
+      operator: action.operator 
+    }; 
+    case 'EQUAL': return { 
+      ...state, 
+      previousWasNumber: false, 
+      operator: action.operator,
+      output: state.currentResult 
+    }; 
+    case 'RESET': return { 
+      ...state,
+      currentResult: 0, 
+      previousWasNumber: false, 
+      operator: action.operator 
+    }; 
+    case 'ENTER_NUMBER': return { 
+      ...state, 
+      curentNumber: action.number, 
+      previousWasNumber: true,
+      output: action.number
+    };
     default: return state; 
   } 
 } 
 
-// задать экшны = описание действия + необх.параметры 
+// ACTION CREATORS
+const incrementActionCreator = (operator) => {
+  return { type: 'INCREMENT', operator: operator}
+}
 
-const incrementActionCreator = (amount) => { 
-  return { 
-    type: 'INCREMENT', 
-    amount: amount 
-  } 
-}; 
+const decrementActionCreator = (operator) => {
+  return { type: 'DECREMENT', operator: operator}
+}
 
-const decrementActionCreator = (amount) => { 
-  return { 
-    type: 'DECREMENT', 
-    amount: amount 
-  } 
-}; 
+const multiplyActionCreator = (operator) => {
+  return { type: 'MULTIPLY', operator: operator}
+}
 
-const resetActionCreator = () => { 
-  return { 
-    type: 'RESET' 
-  } 
-}; 
+const divideActionCreator = (operator) => {
+  return { type: 'DIVIDE', operator: operator}
+}
 
-// инициировать стор = главное хранилище 
+const equalActionCreator = (operator) => {
+  return { type: 'EQUAL', operator: operator}
+}
+
+const resetActionCreator = (operator) => {
+  return { type: 'RESET', operator: operator}
+}
+
+const numberActionCreator = (number) => {
+  return {type: 'ENTER_NUMBER', number: number}
+}
+
+// STORE
 const store = createStore(reducer, initialState, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()); 
 
-class Counter extends React.Component { 
+
+// CLASS
+class Calculator extends React.Component { 
+  constructor(props){
+    super(props);
+    this.defineCreator = this.defineCreator.bind(this);
+  } 
+
+  defineCreator(operator){
+    switch (operator){ 
+      case '+':  this.props.incrementActionCreator();
+      break;
+      case '-':  this.props.decrementActionCreator();
+      break;
+      case '*':  this.props.multiplyActionCreator();
+      break;
+      case '/':  this.props.divideActionCreator();
+      break;
+      case '=':  this.props.equalActionCreator();
+      break;
+      case 'CE': this.props.resetActionCreator();
+      break;
+      default:
+    }; 
+  }
+
   render() { 
-    const dispatch = this.props.dispatch; 
-    console.log(this.props) 
     return ( 
-      <div className="counter"> 
-        <span className="count"> {this.props.count} </span> 
-
-        <div className="buttons"> 
-          <button 
-            className="decrement" 
-            onClick={() => this.props.decrementActionCreator(1)}
-          > - </button> 
-
-          <button 
-            className="increment" 
-            onClick={() => this.props.incrementActionCreator(1)}
-          > + </button> 
-
-          <button 
-            className="reset" 
-            onClick={() => this.props.resetActionCreator()}
-          > reset </button> 
-
-        </div> 
-      </div> 
+      <CalculatorApp 
+        output={this.props.output} 
+        onNumberClick={this.props.numberActionCreator}
+        onOperatorClick={this.defineCreator}
+        history={this.props.history}
+      />  
     ); 
   } 
 } 
 
+// TRANSFER STATE TO CLASS PROPS
 const mapStateToProps = (state) => { 
   return { 
-   count: state.count 
+    curentNumber: state.curentNumber,
+    currentResult: state.currentResult,
+    output: state.output,
+    previousWasNumber: state.previousWasNumber,
+    operator: state.operator,
+    history: state.history
   } 
 }; 
 
+
+// TRANSFER ACTION CREATORS TO CLASS PROPS
 const mapDispatchToProps = (dispatch) => { 
   return { 
     incrementActionCreator: bindActionCreators(incrementActionCreator, dispatch), 
     decrementActionCreator: bindActionCreators(decrementActionCreator, dispatch), 
-    resetActionCreator: bindActionCreators(resetActionCreator, dispatch) 
+    multiplyActionCreator: bindActionCreators(multiplyActionCreator, dispatch), 
+    divideActionCreator: bindActionCreators(divideActionCreator, dispatch), 
+    equalActionCreator: bindActionCreators(equalActionCreator, dispatch), 
+    resetActionCreator: bindActionCreators(resetActionCreator, dispatch), 
+    numberActionCreator: bindActionCreators(numberActionCreator, dispatch), 
   } 
 }; 
 
-const WrappedCounter = connect(mapStateToProps, mapDispatchToProps)(Counter); 
+// CONNECT STORE AND CLASS
+const WrappedCalculator = connect(mapStateToProps, mapDispatchToProps)(Calculator); 
 
+// RENDER APP
 ReactDOM.render( 
   <Provider store={store}> 
-    <WrappedCounter /> 
+    <WrappedCalculator /> 
   </Provider>, 
   document.getElementById('root') 
 );
