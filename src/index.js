@@ -8,7 +8,7 @@ import { Provider, connect } from "react-redux";
 
 // INITIAL STATE
 const initialState = { 
-  curentNumber: 0,
+  currentNumber: 0,
   currentResult: 0,
   output: 0,
   previousWasNumber: true,
@@ -18,36 +18,47 @@ const initialState = {
 
 // REDUCER 
 function reducer(state = initialState, action) { 
+  let {history, currentResult, currentNumber, previousWasNumber, output, operator} = state;
+  if (action.number !== undefined) {
+    history[history.length-1].push(action.number);
+  } else {
+    history[history.length-1].push(action.operator);
+  }
+
   switch (action.type){ 
     case 'INCREMENT': return { 
       ...state, 
-      currentResult: state.currentResult + state.curentNumber, 
+      currentResult: state.currentResult + state.currentNumber, 
       previousWasNumber: false , 
       operator: action.operator
     }; 
     case 'DECREMENT': return { 
       ...state, 
-      currentResult: state.currentResult -  state.curentNumber, 
+      currentResult: state.currentResult -  state.currentNumber, 
       previousWasNumber: false, 
       operator: action.operator 
     }; 
     case 'MULTIPLY': return { 
       ...state, 
-      currentResult: state.currentResult *  state.curentNumber, 
+      currentResult: state.currentResult *  state.currentNumber, 
       previousWasNumber: false, 
       operator: action.operator 
     }; 
     case 'DIVIDE': return { 
       ...state,
-      currentResult: state.currentResult /  state.curentNumber, 
+      currentResult: state.currentResult /  state.currentNumber, 
       previousWasNumber: false, 
       operator: action.operator 
     }; 
-    case 'EQUAL': return { 
+    case 'EQUAL': 
+    currentResult = eval(currentResult + operator + currentNumber);
+    history[history.length-1].push(currentResult);
+    return { 
       ...state, 
       previousWasNumber: false, 
       operator: action.operator,
-      output: state.currentResult 
+      currentResult: currentResult,
+      output: currentResult 
     }; 
     case 'RESET': return { 
       ...state,
@@ -55,11 +66,13 @@ function reducer(state = initialState, action) {
       previousWasNumber: false, 
       operator: action.operator 
     }; 
-    case 'ENTER_NUMBER': return { 
+    case 'ENTER_NUMBER': 
+    return { 
       ...state, 
-      curentNumber: action.number, 
+      currentNumber: action.number, 
       previousWasNumber: true,
-      output: action.number
+      output: action.number,
+      history: history
     };
     default: return state; 
   } 
@@ -107,17 +120,17 @@ class Calculator extends React.Component {
 
   defineCreator(operator){
     switch (operator){ 
-      case '+':  this.props.incrementActionCreator();
+      case '+':  this.props.incrementActionCreator(operator);
       break;
-      case '-':  this.props.decrementActionCreator();
+      case '-':  this.props.decrementActionCreator(operator);
       break;
-      case '*':  this.props.multiplyActionCreator();
+      case '*':  this.props.multiplyActionCreator(operator);
       break;
-      case '/':  this.props.divideActionCreator();
+      case '/':  this.props.divideActionCreator(operator);
       break;
-      case '=':  this.props.equalActionCreator();
+      case '=':  this.props.equalActionCreator(operator);
       break;
-      case 'CE': this.props.resetActionCreator();
+      case 'CE': this.props.resetActionCreator(operator);
       break;
       default:
     }; 
@@ -138,7 +151,7 @@ class Calculator extends React.Component {
 // TRANSFER STATE TO CLASS PROPS
 const mapStateToProps = (state) => { 
   return { 
-    curentNumber: state.curentNumber,
+    currentNumber: state.currentNumber,
     currentResult: state.currentResult,
     output: state.output,
     previousWasNumber: state.previousWasNumber,

@@ -1,6 +1,5 @@
 .history {
-  width: 50%;
-  margin: 0 10px;
+  width: 40%;
   font-family: Calibri;
   
 }
@@ -8,4 +7,9 @@
 .history__field {
   border: 1px solid black;
   height: 300px;
+}
+
+h2 {
+  font-size: 2em;
+  margin: 20px 10px;
 }

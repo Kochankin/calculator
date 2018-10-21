@@ -1,8 +1,13 @@
 .calculator {
-    width: 50%;
-    
+    width: 60%;
+    font-family: Calibri;
+    margin-right: 10px;
 }
 
 .calculator__controls {
     display: flex;
+}
+
+h1 {
+    margin: 20px 10px;
 }

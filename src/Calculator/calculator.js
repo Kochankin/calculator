@@ -9,6 +9,7 @@ class Calculator extends React.Component {
     render() { 
       return ( 
         <div className="calculator"> 
+        <h1> Calculator </h1>
           <Output output={this.props.output} />
           <div className="calculator__controls">
             <Numbers onNumberClick={this.props.onNumberClick} />
